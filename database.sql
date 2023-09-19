@@ -40,4 +40,4 @@ values
 ('Salário'),
 ('Vendas'),
 ('Outras receitas'),
-('Outras despesas')
+('Outras despesas');
