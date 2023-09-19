@@ -1,10 +1,11 @@
 const express = require('express');
+const { cadastrarUsuario } = require('../controladores/usuario');
 
 const rotas = express();
 
 
 // cadastrar usuario
-rotas.post('/usuario', (req, res) => { });
+rotas.post('/usuario', cadastrarUsuario);
 
 // fazer login
 rotas.post('/login', (req, res) => { });
