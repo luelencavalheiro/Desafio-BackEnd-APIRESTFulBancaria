@@ -1,5 +1,7 @@
 const pool = require('../conexao')
 
+const jwt = require('jsonwebtoken')
+
 const cadastrarUsuario = async (req, res) => {
     const { nome, email, senha } = req.body
 
@@ -28,9 +30,47 @@ const cadastrarUsuario = async (req, res) => {
     // FALTA Criptografar a senha antes de persistir no banco de dados
 }
 
+const login = async (req, res) => {
+    const { email, senha } = req.body
+
+    if (!email) {
+        return res.status(400).json({ mensagem: 'O campo email é obrigatório!' })
+    }
+    if (!senha) {
+        return res.status(400).json({ mensagem: 'O campo senha é obrigatório!' })
+    }
+
+    try {
+        const { rowCount } = await pool.query(' select * from usuarios where email = $1', [email])
+        if (rowCount < 0) {
+            return res.status(400).json({ mensagem: 'Email ou senha inválido' })
+
+        }
+
+        const { senha: senhaUsuario, ...usuario } = rows[0];
+        const senhaCorreta = await bcrypt.compare(senha, senhaUsuario)
+
+        if (!senhaCorreta) {
+            return res.status(400).json({ mensagem: 'Senha inválida' })
+        }
+
+        // não coloquei tempo para expirar esse token mas pode colocar 
+        const token = jwt.sign({ id: usuario.id }, { senha: usuario.senhaUsuario })
+        return res.json({
+            usuario,
+            token
+        })
+
+    } catch (error) {
+        return res.status(500).json({ mensagem: 'Erro interno do servidor' })
+    }
+
+}
 
 
 
 
-
-module.exports = { cadastrarUsuario }
+module.exports = {
+    cadastrarUsuario,
+    login
+}

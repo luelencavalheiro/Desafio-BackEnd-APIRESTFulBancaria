@@ -1,5 +1,5 @@
 const express = require('express');
-const { cadastrarUsuario } = require('../controladores/usuario');
+const { cadastrarUsuario, login } = require('../controladores/usuarios');
 
 const rotas = express();
 
@@ -8,7 +8,7 @@ const rotas = express();
 rotas.post('/usuario', cadastrarUsuario);
 
 // fazer login
-rotas.post('/login', (req, res) => { });
+rotas.post('/login', login);
 
 // detalhar perfil do usuario
 rotas.get('/usuario', (req, res) => { });
