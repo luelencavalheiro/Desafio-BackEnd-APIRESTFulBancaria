@@ -2,6 +2,8 @@ const pool = require('../conexao')
 
 const jwt = require('jsonwebtoken')
 
+const senhaJwt = require('../senhaJwt')
+
 const cadastrarUsuario = async (req, res) => {
     const { nome, email, senha } = req.body
 
@@ -54,8 +56,8 @@ const login = async (req, res) => {
             return res.status(400).json({ mensagem: 'Senha inválida' })
         }
 
-        // não coloquei tempo para expirar esse token mas pode colocar 
-        const token = jwt.sign({ id: usuario.id }, { senha: usuario.senhaUsuario })
+
+        const token = jwt.sign({ id: usuario.id }, senhaJwt, { expiresIn: '8h' })
         return res.json({
             usuario,
             token
@@ -67,10 +69,13 @@ const login = async (req, res) => {
 
 }
 
+const editarUsuario = async (req, res) => {
 
+}
 
 
 module.exports = {
     cadastrarUsuario,
-    login
+    login,
+    editarUsuario
 }

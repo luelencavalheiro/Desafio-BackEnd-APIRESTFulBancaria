@@ -1,5 +1,6 @@
 const express = require('express');
-const { cadastrarUsuario, login } = require('../controladores/usuarios');
+const { cadastrarUsuario, login, editarUsuario } = require('../controladores/usuarios');
+const verificaLogin = require('../intermediarios/verificaLogin')
 
 const rotas = express();
 
@@ -10,11 +11,13 @@ rotas.post('/usuario', cadastrarUsuario);
 // fazer login
 rotas.post('/login', login);
 
+rotas.use(verificaLogin)
+
 // detalhar perfil do usuario
 rotas.get('/usuario', (req, res) => { });
 
 // editar perfil do usuario
-rotas.put('/usuario', (req, res) => { });
+rotas.put('/usuario', editarUsuario);
 
 // listar categorias
 rotas.get('/categoria', (req, res) => { });
