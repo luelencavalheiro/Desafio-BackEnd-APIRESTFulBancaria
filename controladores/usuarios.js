@@ -78,6 +78,9 @@ const detalharUsuario = async (req, res) => {
         if (!usuario) {
             return res.status(404).json({ mensagem: 'Usuário não existe' })
         }
+
+        return res.json(usuario)
+
     } catch (error) {
         return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
