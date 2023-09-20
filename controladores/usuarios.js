@@ -77,14 +77,14 @@ const editarUsuario = async (req, res) => {
     const { id } = jwt.verify(token, senhaJwt)
 
     try {
-        const usuario = await pool.query(' select * from usuarios where id = $1 and usuario_id = $2', [id, req.usuario.id]
+        const usuario = await pool.query(' select * from usuarios where id = $1 and usuario_id = $2', [id, req.usuario.id])
 
-     if (!usuario) {
+        if (!usuario) {
             return res.status(404).json({ mensagem: 'Usuário não existe' })
         }
         const queryEditarUsuario = ' update usuarios set nome = $1, email = $2, senha = $3 where id = $4'
 
-        await.pool.query(queryEditarUsuario, [nome, email, senha, id])
+        await pool.query(queryEditarUsuario, [nome, email, senha, id])
 
         return res.status(204).send();
     } catch (error) {
