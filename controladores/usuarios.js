@@ -69,6 +69,24 @@ const login = async (req, res) => {
 
 }
 
+const detalharUsuario = async (req, res) => {
+    const { authorization } = req.header
+    const token = authorization.split(' ')[1]
+    const { id } = jwt.verify(token, senhaJwt)
+    try {
+        const usuario = await pool.query(' select id, nome, email from usuarios where id = $1 and usuario_id = $2', [id, req.usuario.id])
+        if (!usuario) {
+            return res.status(404).json({ mensagem: 'Usuário não existe' })
+        }
+
+        return res.json(usuario)
+
+    } catch (error) {
+        return res.status(500).json({ mensagem: 'Erro interno do servidor' })
+    }
+
+}
+
 const editarUsuario = async (req, res) => {
 
     const { nome, email, senha } = req.body
@@ -97,5 +115,6 @@ const editarUsuario = async (req, res) => {
 module.exports = {
     cadastrarUsuario,
     login,
+    detalharUsuario,
     editarUsuario
 }
