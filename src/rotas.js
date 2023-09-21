@@ -1,6 +1,7 @@
 const express = require('express');
 const { cadastrarUsuario, login, editarUsuario } = require('../controladores/usuarios');
 const verificaLogin = require('../intermediarios/verificaLogin')
+const listarCategorias = require('../controladores/categorias')
 
 const rotas = express();
 
@@ -20,7 +21,7 @@ rotas.get('/usuario', (req, res) => { });
 rotas.put('/usuario', editarUsuario);
 
 // listar categorias
-rotas.get('/categoria', (req, res) => { });
+rotas.get('/categoria', listarCategorias);
 
 // listar transações
 rotas.get('/transacao', (req, res) => { });
