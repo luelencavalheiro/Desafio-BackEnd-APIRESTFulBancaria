@@ -8,12 +8,12 @@ create table usuarios (
 );
 
 create table categorias (
-    id serial primary key,
-  descricao text not null
+  id serial primary key,
+  descricao text unique
 );
 
 create table transacoes (
-    id serial primary key,
+  id serial primary key,
   descricao text references categorias(descricao),
   valor integer not null,
   data timestamp,
