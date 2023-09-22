@@ -2,8 +2,10 @@ const pool = require('../conexao')
 
 const listarTransacoes = async (req, res) => {
     try {
-        const { rows } = await pool.query('select * from transacoes where usuario_id = $1', [req.usuario_id])
-        return res.json(rows)
+        const { rows: transacoes } = await pool.query('select * from transacoes where usuario_id = $1', [req.usuario.id])
+
+        return res.json(transacoes)
+
     } catch (error) {
         return res.status(500).json({ mensagem: "Erro interno do servidor" })
     }
@@ -37,7 +39,7 @@ const cadastrarTransacao = async (req, res) => {
         return res.status(400).json({ mensagem: "O campo id categoria é obrigatório" })
     }
     if (!tipo) {
-        return res.status(400).json({ mensagem: "O campo tipo é obrigatório" })
+        return res.status(400).json({ mensagem: "Informe se é uma entrada ou saida" })
     }
     if (!data) {
         return res.status(400).json({ mensagem: "O campo data é obrigatório" })
@@ -57,6 +59,7 @@ const cadastrarTransacao = async (req, res) => {
 
 const atualizarTransacao = async (req, res) => {
     const { descricao, valor, data, categoria_id, tipo } = req.body
+    const { id } = req.params
 
     if (!descricao) {
         return res.status(400).json({ mensagem: "O campo descrição é obrigatório" })
@@ -75,14 +78,14 @@ const atualizarTransacao = async (req, res) => {
     }
 
     try {
-        const { rows, rowCount } = await pool.query('select * from transacoes where id = $1', [id])
+        const { rows, rowCount } = await pool.query('select * from transacoes where id = $1 and usuario_id = $2', [id, req.usuario.id])
 
-        if (rowCount < 1) {
+        if (rowCount === 0) {
             return res.status(404).json({ mensagem: 'Transação não encontrada' })
         }
 
-        await pool.query(`update transacoes set descricao = $1, valor = $2, data = $3, categoria_id = $4, tipo = $5 where id = $6`
-        [descricao, valor, data, categoria_id, tipo])
+        const queryAtualizarTransacao = `update transacoes set descricao = $1, valor = $2, data = $3, categoria_id = $4, tipo = $5 where id = $6`
+        await pool.query(queryAtualizarTransacao, [descricao, valor, data, categoria_id, tipo, id])
 
         return res.status(204).send()
     } catch (error) {
@@ -91,17 +94,21 @@ const atualizarTransacao = async (req, res) => {
 }
 
 const extratoTransacoes = async (req, res) => {
-    const { id: usuario_id } = req.usuario
-
     try {
-        const { rows: entradas } = await pool.query('select coalesce(sum(valor), 0 as entrada from transacoes where usuario_id = $1 and tipo = $2',
-            [usuario_id, 'entrada'])
-        const { rows: saidas } = await pool.query('select coalesce(sum(valor), 0 as saida from transacoes where usuario_id = $1 and tipo = $2',
-            [usuario_id, 'saida'])
+        const { rows: transacoes } = await pool.query(`select tipo, coalesce(sum(valor), 0) as total from transacoes where usuario_id = $1 group by tipo`,
+            [req.usuario.id])
 
         const extrato = {
-            entrada: entradas[0].entrada,
-            saida: saidas[0].saida
+            entrada: 0,
+            saida: 0
+        }
+
+        for (const row of transacoes) {
+            if (row.tipo === 'entrada') {
+                extrato.entrada = row.total
+            } else if (row.tipo === 'saida') {
+                extrato.saida = row.total
+            }
         }
 
         return res.json(extrato)
