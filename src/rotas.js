@@ -28,6 +28,9 @@ rotas.get('/categoria', listarCategorias);
 // listar transações
 rotas.get('/transacao', listarTransacoes);
 
+// obter extrato das transações
+rotas.get('/transacao/extrato', extratoTransacoes);
+
 // detalhar transação
 rotas.get('/transacao/:id', detalharTransacao);
 
@@ -39,9 +42,6 @@ rotas.put('/transacao/:id', atualizarTransacao);
 
 // remover transação
 rotas.delete('/transacao/:id', deletarTransacoes);
-
-// obter extrato das transações
-rotas.get('/transacao/extrato', extratoTransacoes);
 
 
 module.exports = rotas
