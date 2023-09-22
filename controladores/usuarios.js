@@ -2,6 +2,8 @@ const pool = require('../conexao')
 
 const jwt = require('jsonwebtoken')
 
+const bcrypt = require('bcrypt')
+
 const senhaJwt = require('../senhaJwt')
 
 const cadastrarUsuario = async (req, res) => {
@@ -20,7 +22,7 @@ const cadastrarUsuario = async (req, res) => {
     try {
         const { rowCount } = await pool.query(' select * from usuarios where email = $1', [email])
         if (rowCount === 0) {
-            const query = 'insert into usuarios (nome, email, senha) values ($1, $2, $3) returning (id, nome, email) '
+            const query = 'insert into usuarios (nome, email, senha) values ($1, $2, $3) returning id, nome, email '
             const { rows } = await pool.query(query, [nome, email, senha])
             return res.status(201).json(rows[0])
         }
@@ -43,7 +45,7 @@ const login = async (req, res) => {
     }
 
     try {
-        const { rowCount } = await pool.query(' select * from usuarios where email = $1', [email])
+        const { rowCount, rows } = await pool.query(' select * from usuarios where email = $1', [email])
         if (rowCount < 0) {
             return res.status(400).json({ mensagem: 'Email ou senha inválido' })
 
