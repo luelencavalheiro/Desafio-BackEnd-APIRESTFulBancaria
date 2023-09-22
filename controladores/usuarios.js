@@ -78,9 +78,7 @@ const detalharUsuario = async (req, res) => {
 
 const editarUsuario = async (req, res) => {
     const { nome, email, senha } = req.body
-    const { authorization } = req.header
-    const token = authorization.split(' ')[1]
-    const { id } = jwt.verify(token, senhaJwt)
+    const { id } = req.usuario
 
     try {
         const usuario = await pool.query(' select * from usuarios where id = $1', [id])
