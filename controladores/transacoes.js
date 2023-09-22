@@ -91,6 +91,23 @@ const atualizarTransacao = async (req, res) => {
 }
 
 const extratoTransacoes = async (req, res) => {
+    const { id: usuario_id } = req.usuario
+
+    try {
+        const { rows: entradas } = await pool.query('select coalesce(sum(valor), 0 as entrada from transacoes where usuario_id = $1 and tipo = $2',
+            [usuario_id, 'entrada'])
+        const { rows: saidas } = await pool.query('select coalesce(sum(valor), 0 as saida from transacoes where usuario_id = $1 and tipo = $2',
+            [usuario_id, 'saida'])
+
+        const extrato = {
+            entrada: entradas[0].entrada,
+            saida: saidas[0].saida
+        }
+
+        return res.json(extrato)
+    } catch (error) {
+        return res.status(500).json('Erro interno do servidor')
+    }
 
 }
 
