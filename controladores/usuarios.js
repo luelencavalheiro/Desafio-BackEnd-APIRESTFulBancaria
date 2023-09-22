@@ -73,32 +73,17 @@ const login = async (req, res) => {
 }
 
 const detalharUsuario = async (req, res) => {
-    const { authorization } = req.header
-    const token = authorization.split(' ')[1]
-    const { id } = jwt.verify(token, senhaJwt)
-    try {
-        const usuario = await pool.query(' select id, nome, email from usuarios where id = $1 and usuario_id = $2', [id, req.usuario.id])
-        if (!usuario) {
-            return res.status(404).json({ mensagem: 'Usuário não existe' })
-        }
-
-        return res.json(usuario)
-
-    } catch (error) {
-        return res.status(500).json({ mensagem: 'Erro interno do servidor' })
-    }
-
+    return res.json(req.usuario)
 }
 
 const editarUsuario = async (req, res) => {
-
     const { nome, email, senha } = req.body
     const { authorization } = req.header
     const token = authorization.split(' ')[1]
     const { id } = jwt.verify(token, senhaJwt)
 
     try {
-        const usuario = await pool.query(' select * from usuarios where id = $1 and usuario_id = $2', [id, req.usuario.id])
+        const usuario = await pool.query(' select * from usuarios where id = $1', [id])
 
         if (!usuario) {
             return res.status(404).json({ mensagem: 'Usuário não existe' })
