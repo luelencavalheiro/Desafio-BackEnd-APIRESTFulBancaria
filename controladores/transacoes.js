@@ -73,6 +73,21 @@ const atualizarTransacao = async (req, res) => {
     if (!data) {
         return res.status(400).json({ mensagem: "O campo data é obrigatório" })
     }
+
+    try {
+        const { rows, rowCount } = await pool.query('select * from transacoes where id = $1', [id])
+
+        if (rowCount < 1) {
+            return res.status(404).json({ mensagem: 'Transação não encontrada' })
+        }
+
+        await pool.query(`update transacoes set descricao = $1, valor = $2, data = $3, categoria_id = $4, tipo = $5 where id = $6`
+        [descricao, valor, data, categoria_id, tipo])
+
+        return res.status(204).send()
+    } catch (error) {
+        return res.status(500).json('Erro interno do servidor')
+    }
 }
 
 const extratoTransacoes = async (req, res) => {
