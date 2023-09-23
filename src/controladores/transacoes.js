@@ -52,6 +52,17 @@ const cadastrarTransacao = async (req, res) => {
     }
 
     try {
+        const selecionarId = 'select id from categorias where id = $1'
+        const verificarId = await pool.query(selecionarId, [categoria_id])
+
+        if (verificarId.rowCount === 0) {
+            return res.status(400).json({ Mensagem: "Informe um ID válido" })
+        }
+
+        if (tipo !== 'entrada' && tipo !== 'saida') {
+            return res.status(400).json({ Mensagem: "Tipo deve ser 'entrada' ou 'saida'" })
+        }
+
         const query = `insert into transacoes (usuario_id, descricao, valor, data, categoria_id, tipo)
         values ($1, $2, $3, $4, $5, $6 ) returning *`
 
@@ -66,6 +77,17 @@ const cadastrarTransacao = async (req, res) => {
 }
 
 const atualizarTransacao = async (req, res) => {
+    const selecionarId = 'select id from categorias where id = $1'
+    const verificarId = await pool.query(selecionarId, [categoria_id])
+
+    if (verificarId.rowCount === 0) {
+        return res.status(400).json({ Mensagem: "Informe um ID válido" })
+    }
+
+    if (tipo !== 'entrada' && tipo !== 'saida') {
+        return res.status(400).json({ Mensagem: "Tipo deve ser 'entrada' ou 'saida'" })
+    }
+
     const { descricao, valor, data, categoria_id, tipo } = req.body
     const { id } = req.params
 
