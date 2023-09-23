@@ -2,7 +2,9 @@ const pool = require('../conexao')
 
 const listarTransacoes = async (req, res) => {
     try {
-        const { rows: transacoes } = await pool.query('select * from transacoes where usuario_id = $1', [req.usuario.id])
+        const query = `select t.*, c.descricao as categoria_nome from transacoes t left join categorias c on t.categoria_id = c.id
+        where t.usuario_id = $1`
+        const { rows: transacoes } = await pool.query(query, [req.usuario.id])
 
         return res.json(transacoes)
 

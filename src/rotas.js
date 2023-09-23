@@ -7,7 +7,6 @@ const { listarTransacoes, detalharTransacao, cadastrarTransacao, atualizarTransa
 const rotas = express();
 
 
-// cadastrar usuario
 rotas.post('/usuario', cadastrarUsuario);
 
 rotas.post('/login', login);
