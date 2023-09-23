@@ -17,12 +17,16 @@ const detalharTransacao = async (req, res) => {
     const { id } = req.params
 
     try {
-        const { rows, rowCount } = await pool.query('select * from transacoes where id = $1 and usuario_id = $2', [id, req.usuario.id])
+        const query = `select t.*, c.descricao as categoria_nome from transacoes t left join categorias c on t.categoria_id = c.id
+        where t.id = $1 and t.usuario_id = $2`
+        const { rows, rowCount } = await pool.query(query, [id, req.usuario.id])
         if (rowCount === 0) {
             return res.status(404).json({ Mensagem: "Transação não encontrada." })
         }
         const transacao = rows[0]
+
         return res.json(transacao)
+
     } catch (error) {
         return res.status(500).json({ Mensagem: "Erro interno do servidor" })
     }
@@ -53,7 +57,9 @@ const cadastrarTransacao = async (req, res) => {
 
         const params = [req.usuario.id, descricao, valor, data, categoria_id, tipo]
         const { rows } = await pool.query(query, params)
+
         return res.status(201).json(rows[0])
+
     } catch (error) {
         return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
