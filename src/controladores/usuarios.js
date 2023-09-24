@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
 const senhaJwt = require('../senhaJwt')
-const { verificaEmailSenha, criptografarSenha } = require('../utils')
+const { verificaEmailSenha, criptografarSenha, buscarUsuarioPorEmail } = require('../utils')
 
 const cadastrarUsuario = async (req, res) => {
     const { nome, email, senha } = req.body
@@ -18,7 +18,7 @@ const cadastrarUsuario = async (req, res) => {
 
     try {
         const senhaCriptografada = await criptografarSenha(senha)
-        const { rowCount } = await pool.query(' select * from usuarios where email = $1', [email])
+        const { rowCount } = await buscarUsuarioPorEmail(email);
         if (rowCount === 0) {
             const query = 'insert into usuarios (nome, email, senha) values ($1, $2, $3) returning id, nome, email '
             const { rows } = await pool.query(query, [nome, email, senhaCriptografada])
@@ -36,7 +36,7 @@ const login = async (req, res) => {
     verificaEmailSenha(email, senha, res);
 
     try {
-        const { rowCount, rows } = await pool.query('select * from usuarios where email = $1', [email])
+        const { rowCount, rows } = await buscarUsuarioPorEmail(email);
         if (rowCount === 0) {
             return res.status(400).json({ mensagem: 'Email ou senha inválido' })
         }

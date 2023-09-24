@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt')
+const pool = require('./conexao')
 
 const verificaEmailSenha = (email, senha, res) => {
 
@@ -14,7 +15,13 @@ const criptografarSenha = (senha) => {
     return bcrypt.hash(senha, 10)
 }
 
+const buscarUsuarioPorEmail = (email) => {
+    return pool.query('select * from usuarios where email = $1', [email])
+
+}
+
 module.exports = {
     verificaEmailSenha,
-    criptografarSenha
+    criptografarSenha,
+    buscarUsuarioPorEmail
 }
