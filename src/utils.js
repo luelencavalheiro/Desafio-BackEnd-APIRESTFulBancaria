@@ -20,8 +20,14 @@ const buscarUsuarioPorEmail = (email) => {
 
 }
 
+const buscarUsuarioPorId = (id) => {
+    return pool.query('select * from usuarios where id = $1', [id])
+
+}
+
 module.exports = {
     verificaEmailSenha,
     criptografarSenha,
-    buscarUsuarioPorEmail
+    buscarUsuarioPorEmail,
+    buscarUsuarioPorId
 }

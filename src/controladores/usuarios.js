@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
 const senhaJwt = require('../senhaJwt')
-const { verificaEmailSenha, criptografarSenha, buscarUsuarioPorEmail } = require('../utils')
+const { verificaEmailSenha, criptografarSenha, buscarUsuarioPorEmail, buscarUsuarioPorId } = require('../utils')
 
 const cadastrarUsuario = async (req, res) => {
     const { nome, email, senha } = req.body
@@ -68,7 +68,7 @@ const editarUsuario = async (req, res) => {
     const { id } = req.usuario
 
     try {
-        const usuario = await pool.query('select * from usuarios where id = $1', [id])
+        const usuario = await buscarUsuarioPorId(id)
 
         if (!usuario) {
             return res.status(404).json({ mensagem: 'Usuário não existe' })
