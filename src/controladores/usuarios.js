@@ -31,8 +31,6 @@ const cadastrarUsuario = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
-
-
 }
 
 const login = async (req, res) => {
@@ -46,10 +44,9 @@ const login = async (req, res) => {
     }
 
     try {
-        const { rowCount, rows } = await pool.query(' select * from usuarios where email = $1', [email])
-        if (rowCount < 0) {
+        const { rowCount, rows } = await pool.query('select * from usuarios where email = $1', [email])
+        if (rowCount === 0) {
             return res.status(400).json({ mensagem: 'Email ou senha inválido' })
-
         }
 
         const { senha: senhaUsuario, ...usuario } = rows[0];
@@ -58,7 +55,6 @@ const login = async (req, res) => {
         if (!senhaCorreta) {
             return res.status(400).json({ mensagem: 'Senha inválida' })
         }
-
 
         const token = jwt.sign({ id: usuario.id }, senhaJwt, { expiresIn: '8h' })
         return res.json({
@@ -69,7 +65,6 @@ const login = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
-
 }
 
 const detalharUsuario = async (req, res) => {
@@ -81,22 +76,23 @@ const editarUsuario = async (req, res) => {
     const { id } = req.usuario
 
     try {
-        const usuario = await pool.query(' select * from usuarios where id = $1', [id])
+        const usuario = await pool.query('select * from usuarios where id = $1', [id])
 
         if (!usuario) {
             return res.status(404).json({ mensagem: 'Usuário não existe' })
         }
-        const queryEditarUsuario = ' update usuarios set nome = $1, email = $2, senha = $3 where id = $4'
 
-        await pool.query(queryEditarUsuario, [nome, email, senha, id])
+        const senhaCriptografada = await bcrypt.hash(senha, 10)
+
+        const queryEditarUsuario = 'update usuarios set nome = $1, email = $2, senha = $3 where id = $4'
+
+        await pool.query(queryEditarUsuario, [nome, email, senhaCriptografada, id])
 
         return res.status(204).send();
     } catch (error) {
         return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
-
 }
-
 
 module.exports = {
     cadastrarUsuario,
