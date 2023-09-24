@@ -2,11 +2,27 @@ const pool = require('../conexao')
 
 const listarTransacoes = async (req, res) => {
     try {
-        const query = `select t.*, c.descricao as categoria_nome from transacoes t left join categorias c on t.categoria_id = c.id
-        where t.usuario_id = $1`
-        const { rows: transacoes } = await pool.query(query, [req.usuario.id])
+        const { filtro } = req.query
 
-        return res.json(transacoes)
+        const query = `select t.*, c.descricao as categoria_nome from transacoes t left join categorias c on t.categoria_id = c.id
+        where t.usuario_id = $1 ${filtro ? `and c.descricao = any($2::text[])` : ''}`
+
+        const params = [req.usuario.id]
+
+        if (filtro && filtro.length > 0) {
+            const { rows: transacoes } = await pool.query(query, [req.usuario.id, filtro])
+
+            if (transacoes.rowCount === 0) {
+                return res.status(404).json({ Mensagem: "Nenhuma transação encontrada" })
+            }
+
+            return res.json(transacoes)
+        } else {
+            const { rows: transacoes } = await pool.query(query, params)
+            return res.json(transacoes)
+        }
+
+
 
     } catch (error) {
         return res.status(500).json({ mensagem: "Erro interno do servidor" })
