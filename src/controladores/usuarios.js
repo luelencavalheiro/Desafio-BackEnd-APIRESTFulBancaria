@@ -12,9 +12,8 @@ const cadastrarUsuario = async (req, res) => {
     if (!nome) {
         return res.status(400).json({ mensagem: 'O campo nome é obrigatório!' })
     }
+
     verificaEmailSenha(email, senha, res);
-
-
 
     try {
         const senhaCriptografada = await criptografarSenha(senha)
