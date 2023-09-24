@@ -12,6 +12,10 @@ const verificaLogin = async (req, res, next) => {
 
     const token = authorization.split(' ')[1]
 
+    if (!token) {
+        return res.status(401).json({ mensagem: 'Você precisa ter o token de autenticação' })
+    }
+
     try {
 
         const { id } = jwt.verify(token, senhaJwt)
