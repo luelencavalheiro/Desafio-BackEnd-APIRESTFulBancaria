@@ -9,14 +9,14 @@ create table usuarios (
 
 create table categorias (
   id serial primary key,
-  descricao text unique
+  descricao text not null unique
 );
 
 create table transacoes (
   id serial primary key,
-  descricao text references categorias(descricao),
+  descricao text not null,
   valor integer not null,
-  data timestamp,
+  data timestamp not null,
   categoria_id integer references categorias(id),
   usuario_id integer references usuarios(id),
   tipo text not null

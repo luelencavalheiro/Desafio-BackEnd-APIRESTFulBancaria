@@ -2,7 +2,9 @@ const pool = require('../conexao')
 
 const listarTransacoes = async (req, res) => {
     try {
-        const { rows: transacoes } = await pool.query('select * from transacoes where usuario_id = $1', [req.usuario.id])
+        const query = `select t.*, c.descricao as categoria_nome from transacoes t left join categorias c on t.categoria_id = c.id
+        where t.usuario_id = $1`
+        const { rows: transacoes } = await pool.query(query, [req.usuario.id])
 
         return res.json(transacoes)
 
@@ -15,12 +17,16 @@ const detalharTransacao = async (req, res) => {
     const { id } = req.params
 
     try {
-        const { rows, rowCount } = await pool.query('select * from transacoes where id = $1 and usuario_id = $2', [id, req.usuario.id])
+        const query = `select t.*, c.descricao as categoria_nome from transacoes t left join categorias c on t.categoria_id = c.id
+        where t.id = $1 and t.usuario_id = $2`
+        const { rows, rowCount } = await pool.query(query, [id, req.usuario.id])
         if (rowCount === 0) {
             return res.status(404).json({ Mensagem: "Transação não encontrada." })
         }
         const transacao = rows[0]
+
         return res.json(transacao)
+
     } catch (error) {
         return res.status(500).json({ Mensagem: "Erro interno do servidor" })
     }
@@ -46,12 +52,25 @@ const cadastrarTransacao = async (req, res) => {
     }
 
     try {
+        const selecionarId = 'select id from categorias where id = $1'
+        const verificarId = await pool.query(selecionarId, [categoria_id])
+
+        if (verificarId.rowCount === 0) {
+            return res.status(400).json({ Mensagem: "Informe um ID válido" })
+        }
+
+        if (tipo !== 'entrada' && tipo !== 'saida') {
+            return res.status(400).json({ Mensagem: "Tipo deve ser 'entrada' ou 'saida'" })
+        }
+
         const query = `insert into transacoes (usuario_id, descricao, valor, data, categoria_id, tipo)
         values ($1, $2, $3, $4, $5, $6 ) returning *`
 
         const params = [req.usuario.id, descricao, valor, data, categoria_id, tipo]
         const { rows } = await pool.query(query, params)
+
         return res.status(201).json(rows[0])
+
     } catch (error) {
         return res.status(500).json({ mensagem: 'Erro interno do servidor' })
     }
@@ -78,6 +97,17 @@ const atualizarTransacao = async (req, res) => {
     }
 
     try {
+
+        const selecionarId = 'select id from categorias where id = $1'
+        const verificarId = await pool.query(selecionarId, [categoria_id])
+
+        if (verificarId.rowCount === 0) {
+            return res.status(400).json({ Mensagem: "Informe um ID válido" })
+        }
+
+        if (tipo !== 'entrada' && tipo !== 'saida') {
+            return res.status(400).json({ Mensagem: "Tipo deve ser 'entrada' ou 'saida'" })
+        }
         const { rows, rowCount } = await pool.query('select * from transacoes where id = $1 and usuario_id = $2', [id, req.usuario.id])
 
         if (rowCount === 0) {
