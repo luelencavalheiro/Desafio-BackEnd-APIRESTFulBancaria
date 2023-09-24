@@ -5,22 +5,19 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
 const senhaJwt = require('../senhaJwt')
+const { verificaEmailSenha, criptografarSenha } = require('../utils')
 
 const cadastrarUsuario = async (req, res) => {
     const { nome, email, senha } = req.body
-
     if (!nome) {
         return res.status(400).json({ mensagem: 'O campo nome é obrigatório!' })
     }
-    if (!email) {
-        return res.status(400).json({ mensagem: 'O campo email é obrigatório!' })
-    }
-    if (!senha) {
-        return res.status(400).json({ mensagem: 'O campo senha é obrigatório!' })
-    }
+    verificaEmailSenha(email, senha, res);
+
+
 
     try {
-        const senhaCriptografada = await bcrypt.hash(senha, 10)
+        const senhaCriptografada = await criptografarSenha(senha)
         const { rowCount } = await pool.query(' select * from usuarios where email = $1', [email])
         if (rowCount === 0) {
             const query = 'insert into usuarios (nome, email, senha) values ($1, $2, $3) returning id, nome, email '
@@ -36,12 +33,7 @@ const cadastrarUsuario = async (req, res) => {
 const login = async (req, res) => {
     const { email, senha } = req.body
 
-    if (!email) {
-        return res.status(400).json({ mensagem: 'O campo email é obrigatório!' })
-    }
-    if (!senha) {
-        return res.status(400).json({ mensagem: 'O campo senha é obrigatório!' })
-    }
+    verificaEmailSenha(email, senha, res);
 
     try {
         const { rowCount, rows } = await pool.query('select * from usuarios where email = $1', [email])
@@ -82,7 +74,7 @@ const editarUsuario = async (req, res) => {
             return res.status(404).json({ mensagem: 'Usuário não existe' })
         }
 
-        const senhaCriptografada = await bcrypt.hash(senha, 10)
+        const senhaCriptografada = await criptografarSenha(senha)
 
         const queryEditarUsuario = 'update usuarios set nome = $1, email = $2, senha = $3 where id = $4'
 
