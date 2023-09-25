@@ -6,7 +6,7 @@
 
 - criação de rotas usando status code
 - validação de dados e requisições
-- criação de banco de dados PostGrees
+- criação de banco de dados PostgreSQL
 - manipulação de informações no banco de dados
 - criptografia de senha antes de armazer no banco de dados
 - verificação de token de autenticação
