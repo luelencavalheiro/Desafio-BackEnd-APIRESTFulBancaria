@@ -1,12 +1,26 @@
 const bcrypt = require('bcrypt')
 const pool = require('./conexao')
 
-const verificaEmailSenha = (email, senha, res) => {
-    if (!email) {
-        return res.status(400).json({ mensagem: 'O campo email é obrigatório!' })
+const camposObrigatorios = (req, res, campos) => {
+    for (const i of campos) {
+        if (!req.body[i]) {
+            return res.status(400).json({ Mensagem: `O campo ${campos} é obrigatório!` })
+        }
     }
-    if (!senha) {
-        return res.status(400).json({ mensagem: 'O campo senha é obrigatório!' })
+}
+
+const idCategoria = async (res, categoria_id) => {
+    const selecionaId = 'select id from categorias where id = $1'
+    const verificaId = await pool.query(selecionaId, [categoria_id])
+
+    if (verificaId.rowCount === 0) {
+        return res.status(400).json({ Mensagem: "Informe um ID válido!" })
+    }
+}
+
+const verificaTipo = (res, tipo) => {
+    if (tipo !== 'entrada' && tipo !== 'saida') {
+        return res.status(400).json({ Mensagem: "Tipo deve ser 'entrada' ou 'saida'!" })
     }
 }
 
@@ -23,7 +37,9 @@ const buscarUsuarioPorId = (id) => {
 }
 
 module.exports = {
-    verificaEmailSenha,
+    camposObrigatorios,
+    idCategoria,
+    verificaTipo,
     criptografarSenha,
     buscarUsuarioPorEmail,
     buscarUsuarioPorId
