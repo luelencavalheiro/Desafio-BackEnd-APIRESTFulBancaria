@@ -1,4 +1,5 @@
 const pool = require('../conexao')
+const { camposObrigatorios, idCategoria, verificaTipo } = require('../utils/utils')
 
 const listarTransacoes = async (req, res) => {
     try {
@@ -51,33 +52,10 @@ const detalharTransacao = async (req, res) => {
 const cadastrarTransacao = async (req, res) => {
     const { descricao, valor, data, categoria_id, tipo } = req.body
 
-    if (!descricao) {
-        return res.status(400).json({ mensagem: "O campo descrição é obrigatório" })
-    }
-    if (!valor) {
-        return res.status(400).json({ mensagem: "O campo valor é obrigatório" })
-    }
-    if (!categoria_id) {
-        return res.status(400).json({ mensagem: "O campo id categoria é obrigatório" })
-    }
-    if (!tipo) {
-        return res.status(400).json({ mensagem: "Informe se é uma entrada ou saida" })
-    }
-    if (!data) {
-        return res.status(400).json({ mensagem: "O campo data é obrigatório" })
-    }
-
     try {
-        const selecionarId = 'select id from categorias where id = $1'
-        const verificarId = await pool.query(selecionarId, [categoria_id])
-
-        if (verificarId.rowCount === 0) {
-            return res.status(400).json({ Mensagem: "Informe um ID válido" })
-        }
-
-        if (tipo !== 'entrada' && tipo !== 'saida') {
-            return res.status(400).json({ Mensagem: "Tipo deve ser 'entrada' ou 'saida'" })
-        }
+        camposObrigatorios(req, res, ['descricao', 'valor', 'categoria_id', 'tipo', 'data'])
+        await idCategoria(res, categoria_id)
+        verificaTipo(res, tipo)
 
         const query = `insert into transacoes (usuario_id, descricao, valor, data, categoria_id, tipo)
         values ($1, $2, $3, $4, $5, $6 ) returning *`
@@ -96,34 +74,11 @@ const atualizarTransacao = async (req, res) => {
     const { descricao, valor, data, categoria_id, tipo } = req.body
     const { id } = req.params
 
-    if (!descricao) {
-        return res.status(400).json({ mensagem: "O campo descrição é obrigatório" })
-    }
-    if (!valor) {
-        return res.status(400).json({ mensagem: "O campo valor é obrigatório" })
-    }
-    if (!categoria_id) {
-        return res.status(400).json({ mensagem: "O campo id categoria é obrigatório" })
-    }
-    if (!tipo) {
-        return res.status(400).json({ mensagem: "O campo tipo é obrigatório" })
-    }
-    if (!data) {
-        return res.status(400).json({ mensagem: "O campo data é obrigatório" })
-    }
-
     try {
 
-        const selecionarId = 'select id from categorias where id = $1'
-        const verificarId = await pool.query(selecionarId, [categoria_id])
-
-        if (verificarId.rowCount === 0) {
-            return res.status(400).json({ Mensagem: "Informe um ID válido" })
-        }
-
-        if (tipo !== 'entrada' && tipo !== 'saida') {
-            return res.status(400).json({ Mensagem: "Tipo deve ser 'entrada' ou 'saida'" })
-        }
+        camposObrigatorios(req, res, ['descricao', 'valor', 'categoria_id', 'tipo', 'data'])
+        await idCategoria(res, categoria_id)
+        verificaTipo(res, tipo)
         const { rows, rowCount } = await pool.query('select * from transacoes where id = $1 and usuario_id = $2', [id, req.usuario.id])
 
         if (rowCount === 0) {
