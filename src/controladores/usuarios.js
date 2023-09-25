@@ -5,15 +5,11 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
 const senhaJwt = require('../senhaJwt')
-const { verificaEmailSenha, criptografarSenha, buscarUsuarioPorEmail, buscarUsuarioPorId } = require('../utils')
+const { criptografarSenha, buscarUsuarioPorEmail, buscarUsuarioPorId, camposObrigatorios } = require('../utils')
 
 const cadastrarUsuario = async (req, res) => {
     const { nome, email, senha } = req.body
-    if (!nome) {
-        return res.status(400).json({ mensagem: 'O campo nome é obrigatório!' })
-    }
-
-    verificaEmailSenha(email, senha, res);
+    camposObrigatorios(req, res, ['nome', 'email', 'senha'])
 
     try {
         const senhaCriptografada = await criptografarSenha(senha)
@@ -32,7 +28,7 @@ const cadastrarUsuario = async (req, res) => {
 const login = async (req, res) => {
     const { email, senha } = req.body
 
-    verificaEmailSenha(email, senha, res);
+    camposObrigatorios(req, res, ['email', 'senha'])
 
     try {
         const { rowCount, rows } = await buscarUsuarioPorEmail(email);
