@@ -1,5 +1,5 @@
 const pool = require('../conexao')
-const { camposObrigatorios, idCategoria, verificaTipo } = require('../utils/utils')
+const { camposObrigatorios, idCategoria, verificaTipo } = require('../utils')
 
 const listarTransacoes = async (req, res) => {
     try {
